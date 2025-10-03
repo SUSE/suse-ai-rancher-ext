@@ -645,17 +645,27 @@ async function findHelmReleaseObjects(
   releaseName: string
 ): Promise<{ secret?: HelmSecret; configmap?: HelmConfigMap }> {
   try {
-    // First try to find the latest version of the Helm release secret
-    // List all secrets to find the highest version number
+    // First try to find the latest version of the Helm release secret using proper K8s API
+    // This ensures we query the correct cluster
     try {
-      const url = `/v1/secrets?namespaceId=${encodeURIComponent(namespace)}&limit=1000`;
+      const url = `/k8s/clusters/${encodeURIComponent(clusterId)}/api/v1/namespaces/${encodeURIComponent(namespace)}/secrets?limit=1000`;
+      console.log('[SUSE-AI DEBUG] Fetching Helm secrets:', { url, clusterId, namespace, releaseName });
       const response = await $store.dispatch('rancher/request', { url });
-      const secrets = response?.data || response?.items || response || [];
+      const secrets = response?.data?.items || response?.data || [];
+      console.log('[SUSE-AI DEBUG] All secrets response:', {
+        secretsLength: secrets.length,
+        secretNames: secrets.map((s: HelmSecret) => s.metadata?.name).slice(0, 10)
+      });
 
       // Find all Helm release secrets for this release
       const helmSecrets = secrets.filter((secret: HelmSecret) =>
         secret.metadata?.name?.startsWith(`sh.helm.release.v1.${releaseName}.v`)
       );
+      console.log('[SUSE-AI DEBUG] Filtered Helm secrets:', {
+        releaseName,
+        helmSecretsLength: helmSecrets.length,
+        helmSecretNames: helmSecrets.map((s: HelmSecret) => s.metadata?.name)
+      });
 
       if (helmSecrets.length > 0) {
         // Sort by version number (extract vN from the name)
@@ -668,16 +678,17 @@ async function findHelmReleaseObjects(
         const latestSecret = sortedSecrets[0];
         const secretName = latestSecret.metadata.name;
 
-        console.log('[SUSE-AI DEBUG] Found Helm release versions:', helmSecrets.map((s: HelmSecret) => s.metadata.name));
-        console.log('[SUSE-AI DEBUG] Using latest version:', secretName);
+        console.log('[SUSE-AI DEBUG] Using latest Helm release version:', secretName);
 
         // Now fetch the latest secret with includeHelmData=true
-        const detailUrl = `/v1/secrets/${encodeURIComponent(namespace)}/${encodeURIComponent(secretName)}?exclude=metadata.managedFields&includeHelmData=true`;
+        const detailUrl = `/k8s/clusters/${encodeURIComponent(clusterId)}/api/v1/namespaces/${encodeURIComponent(namespace)}/secrets/${encodeURIComponent(secretName)}?exclude=metadata.managedFields&includeHelmData=true`;
         const secret = await $store.dispatch('rancher/request', { url: detailUrl });
         if (secret?.data?.release) {
           console.log('[SUSE-AI] Found Helm secret with includeHelmData=true:', secretName);
           return { secret };
         }
+      } else {
+        console.log('[SUSE-AI DEBUG] No Helm secrets found for release, will try fallback');
       }
     } catch (e: unknown) {
       console.log('[SUSE-AI] Failed to find latest Helm secret, trying fallback:', getErrorMessage(e));
