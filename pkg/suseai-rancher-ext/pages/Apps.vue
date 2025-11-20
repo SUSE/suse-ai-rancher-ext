@@ -147,6 +147,9 @@
             <div class="tile-info">
               <h3 class="tile-title">{{ app.name }}</h3>
               <div class="tile-meta">
+                <span v-if="isSuseAiApp(app)" class="badge-state bg-primary">
+                  SUSE AI
+                </span>
                 <span v-if="app.packaging_format" class="badge-state" :class="getBadgeClass(app.packaging_format)">
                   {{ formatPackagingType(app.packaging_format) }}
                 </span>
@@ -155,7 +158,9 @@
           </div>
 
           <div class="tile-content">
-            <p class="tile-description">{{ app.description || '—' }}</p>
+            <p class="tile-description">
+              <span class="tile-description-text">{{ app.description || '—' }}</span>
+            </p>
 
             <!-- Installation status -->
             <div v-if="getInstallationInfo(app.slug_name).installed" class="install-status">
@@ -209,8 +214,11 @@
                   <img :src="logoFor(app)" alt="" @error="onImgError($event)" class="table-logo" />
                   <div class="name-info">
                     <div class="app-name">{{ app.name }}</div>
-                    <div v-if="app.packaging_format" class="app-meta">
-                      <span class="badge-state badge-sm" :class="getBadgeClass(app.packaging_format)">
+                    <div v-if="isSuseAiApp(app) || app.packaging_format" class="app-meta">
+                      <span v-if="isSuseAiApp(app)" class="badge-state badge-sm bg-primary">
+                        SUSE AI
+                      </span>
+                      <span v-if="app.packaging_format" class="badge-state badge-sm" :class="getBadgeClass(app.packaging_format)">
                         {{ formatPackagingType(app.packaging_format) }}
                       </span>
                     </div>
@@ -403,12 +411,31 @@ export default defineComponent({
       return format === 'HELM_CHART' ? 'Helm' : 'Container';
     };
 
+    const isSuseAiApp = (app: AppCollectionItem): boolean => {
+      return app.slug_name?.startsWith('suse-ai-') || false;
+    };
+
     const getClusterDisplayName = (clusterId: string): string => {
       const cluster = clusters.value.find(c => c.id === clusterId);
       return cluster?.name || clusterId;
     };
 
     const logoFor = (item: AppCollectionItem): string => {
+      // Use white versions for Ollama and Open WebUI logos
+      if (item.logo_url) {
+        if (item.logo_url.includes('ollama.png')) {
+          return require('../assets/logos/white/ollama-white.png');
+        }
+        if (item.logo_url.includes('open-webui.png') && !item.logo_url.includes('mcpo') && !item.logo_url.includes('pipelines')) {
+          return require('../assets/logos/white/open-webui-white.png');
+        }
+        if (item.logo_url.includes('open-webui-mcpo.png')) {
+          return require('../assets/logos/white/open-webui-mcpo-white.png');
+        }
+        if (item.logo_url.includes('open-webui-pipelines.png')) {
+          return require('../assets/logos/white/open-webui-pipelines-white.png');
+        }
+      }
       return item.logo_url || '/img/generic-app.svg';
     };
 
@@ -603,6 +630,7 @@ export default defineComponent({
       getInstallationInfo,
       getBadgeClass,
       formatPackagingType,
+      isSuseAiApp,
       getClusterDisplayName,
       logoFor,
       onImgError,
@@ -613,9 +641,19 @@ export default defineComponent({
 </script>
 
 <style lang="scss" scoped>
-// Main container
+// Main container - surface-0 (page background)
+.main-layout {
+  background: var(--body-bg, #ffffff);
+  min-height: 100vh;
+
+  .outlet {
+    padding: 20px 24px;
+  }
+}
+
+// Legacy class for compatibility
 .suse-ai-apps {
-  background: #ffffff;
+  background: var(--body-bg, #ffffff);
   min-height: 100vh;
   padding: 20px 24px;
 }
@@ -627,6 +665,18 @@ export default defineComponent({
   }
   to {
     transform: rotate(360deg);
+  }
+}
+
+@keyframes gradient-shift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
   }
 }
 
@@ -845,6 +895,8 @@ export default defineComponent({
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 20px;
+  // Ensure page background (surface-0) is set
+  background: var(--body-bg, #ffffff);
 
   @media (max-width: 1400px) {
     grid-template-columns: repeat(3, 1fr);
@@ -862,28 +914,38 @@ export default defineComponent({
 .app-tile {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--border);
-  border-radius: var(--border-radius);
-  background: var(--body-bg);
-  transition: all 0.2s ease;
+  border: 1px solid var(--border, rgba(0, 0, 0, 0.08));
+  border-radius: var(--border-radius, 8px);
+  // surface-1: slightly lighter than page surface-0
+  background: var(--box-bg, var(--input-bg, #ffffff));
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   position: relative;
-
-  &:hover {
-    border-color: var(--primary);
-    box-shadow: 0 2px 8px var(--shadow);
-  }
 
   &.clickable-tile {
     cursor: pointer;
 
+    // Hover state: blue border glow using same blue as refresh button
     &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px var(--shadow);
+      border-color: var(--primary, #0066cc);
+
+      .tile-header {
+        // Animate gradient on hover
+        animation: gradient-shift 3s ease infinite;
+      }
+    }
+
+    // Selected state: surface-2 + brand-blue border + elevated bg
+    &.selected {
+      background: var(--hover-bg, var(--accent-bg, #f9fafb));
+      border-color: var(--primary, #0066cc);
+      border-width: 1px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.06);
     }
 
     &:focus {
-      outline: 2px solid var(--primary);
+      outline: 2px solid var(--primary, #0066cc);
       outline-offset: 2px;
     }
 
@@ -898,6 +960,10 @@ export default defineComponent({
     gap: 16px;
     padding: 20px 20px 16px;
     border-bottom: 1px solid var(--border);
+    // Very dark navy blue gradient background with extended colors for animation
+    background: linear-gradient(135deg, #0a1929 0%, #0f1e35 25%, #152238 50%, #1a2a3f 75%, #0f1e35 100%);
+    background-size: 200% 200%;
+    transition: background-position 0.3s ease;
 
     .tile-logo {
       width: 48px;
@@ -919,7 +985,8 @@ export default defineComponent({
         font-size: 16px;
         font-weight: 600;
         line-height: 1.3;
-        color: var(--body-text);
+        // Light color for contrast on dark navy background
+        color: #e8f0f8;
         letter-spacing: -0.025em;
       }
 
@@ -934,29 +1001,38 @@ export default defineComponent({
 
   .tile-content {
     flex: 1;
-    padding: 0 20px 20px;
+    padding: 20px;
     display: flex;
     flex-direction: column;
 
     .tile-description {
-      margin: 0 0 16px 0;
-      color: var(--muted);
+      margin: 0;
+      padding: 12px 0;
+      // Lower contrast for description (typography hierarchy)
+      color: var(--muted, #6b7280);
       line-height: 1.5;
       font-size: 14px;
+      text-align: center;
+      display: flex;
+      align-items: center;
+      justify-content: center;
       flex: 1;
-      min-height: 42px; // Reserve space for 2 lines
+      min-height: 0;
 
-      // Clamp to 3 lines for better content display
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
+      .tile-description-text {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-align: center;
+      }
     }
 
     .install-status {
       margin-top: auto;
-      padding-top: 12px;
+      padding-top: 16px;
       border-top: 1px solid var(--border);
+      flex-shrink: 0;
 
       .status-label {
         display: block;
@@ -1148,6 +1224,11 @@ export default defineComponent({
   &.bg-warning {
     background: var(--warning-banner-bg, #fef3c7);
     color: var(--warning, #d97706);
+  }
+
+  &.bg-primary {
+    background: var(--primary, #0066cc);
+    color: var(--primary-text, #ffffff);
   }
 }
 

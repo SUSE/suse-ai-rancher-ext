@@ -82,7 +82,7 @@ const RAW_APPS = [
       "repository_url": "oci://dp.apps.rancher.io/charts"    
     },
     {
-      "name": "Open WebUI mcpo",
+      "name": "MCPO for Open WebUI",
       "slug_name": "open-webui-mcpo",
       "description": "A simple, secure MCP-to-OpenAPI proxy server.",
       "project_url": "https://openwebui.com",
@@ -94,7 +94,7 @@ const RAW_APPS = [
       "repository_url": "oci://dp.apps.rancher.io/charts"    
     },
     {
-      "name": "Open WebUI Pipelines",
+      "name": "Pipelines for Open WebUI",
       "slug_name": "open-webui-pipelines",
       "description": "Pipelines bring modular, customizable workflows to any UI client supporting OpenAI API specs and much more! Easily extend functionalities, integrate unique logic, and create dynamic workflows with just a few lines of code.",
       "project_url": "https://openwebui.com",
@@ -119,7 +119,7 @@ const RAW_APPS = [
       "repository_url": "oci://dp.apps.rancher.io/charts"    
     },
     {
-      "name": "SUSE AI Deployer",
+      "name": "Deployer",
       "slug_name": "suse-ai-deployer",
       "description": "A Meta Helm chart for deploying SUSE AI components",
       "project_url": "https://github.com/SUSE/suse-ai-deployer",
@@ -132,7 +132,7 @@ const RAW_APPS = [
       "repository_url": "oci://dp.apps.rancher.io/charts"    
     },
     {
-      "name": "SUSE AI Observability Extension",
+      "name": "Observability Extension",
       "slug_name": "suse-ai-observability-extension",
       "description": "The SUSE AI Observability Extension enhances SUSE Observability with AI-optimized dashboards and visualizations. It seamlessly integrates with applications instrumented using the OpenLIT SDK.",
       "project_url": "https://github.com/SUSE/suse-ai-observability-extension",

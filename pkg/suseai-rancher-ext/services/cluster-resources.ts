@@ -63,12 +63,12 @@ const APP_RESOURCE_PROFILES: Record<string, AppResourceProfile> = {
   },
   'open-webui-mcpo': {
     slug: 'open-webui-mcpo',
-    name: 'Open WebUI mcpo',
+    name: 'MCPO for Open WebUI',
     requirements: { cpu: 2, memory: 4, storage: 2 }
   },
   'open-webui-pipelines': {
     slug: 'open-webui-pipelines',
-    name: 'Open WebUI Pipelines',
+    name: 'Pipelines for Open WebUI',
     requirements: { cpu: 2, memory: 4, storage: 2 }
   },
   'milvus': {
@@ -78,12 +78,12 @@ const APP_RESOURCE_PROFILES: Record<string, AppResourceProfile> = {
   },
   'suse-ai-deployer': {
     slug: 'suse-ai-deployer',
-    name: 'SUSE AI Deployer',
+    name: 'Deployer',
     requirements: { cpu: 4, memory: 16, gpu: 12, storage: 100 }
   },
   'suse-ai-observability-extension': {
     slug: 'suse-ai-observability-extension',
-    name: 'SUSE AI Observability Extension',
+    name: 'Observability Extension',
     requirements: { cpu: 1, memory: 2, storage: 2 }
   },
   'vllm': {
