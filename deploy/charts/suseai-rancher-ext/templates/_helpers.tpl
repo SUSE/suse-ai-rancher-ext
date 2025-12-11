@@ -2,7 +2,7 @@
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride }}
 {{- else -}}
-{{- include "ui-extension.name" . }}-ext
+{{- include "ui-extension.name" . }}
 {{- end -}}
 {{- end }}
 
