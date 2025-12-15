@@ -23,28 +23,17 @@ resources:
     cpu: "100m"
     memory: "256Mi"
 
-
 probes:
   liveness:
     enabled: true
     path: /
     port: 8080
+    periodSeconds: 10
   readiness:
     enabled: true
     path: /
     port: 8080
-
-securityContext:
-  runAsUser: 1000
-  runAsGroup: 1000
-  runAsNonRoot: true
-  readOnlyRootFilesystem: false
-  allowPrivilegeEscalation: false
-  capabilities:
-    drop: ["ALL"]
-
-podSecurityContext:
-  fsGroup: 1000
+    periodSeconds: 10
 
 nodeSelector: {}
 tolerations: []
