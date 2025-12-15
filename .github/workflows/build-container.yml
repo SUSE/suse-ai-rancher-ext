@@ -1,4 +1,4 @@
-name: Build and Publish Extension Catalog
+name: Build and Publish Extension Container and Helm Chart
 
 on: [push, pull_request, workflow_dispatch]
 
