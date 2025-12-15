@@ -26,13 +26,15 @@ resources:
 probes:
   liveness:
     enabled: true
-    path: /
-    port: 8080
+    httpGet:
+      path: /
+      port: 8080
     periodSeconds: 10
   readiness:
     enabled: true
-    path: /
-    port: 8080
+    httpGet:
+      path: /
+      port: 8080
     periodSeconds: 10
 
 nodeSelector: {}
