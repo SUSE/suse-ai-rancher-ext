@@ -24,9 +24,10 @@ spec:
     spec:
       securityContext:
         fsGroup: 1000
+      {{- include "ui-extension.imagePullSecrets" . | nindent 6 }}
       containers:
         - name: {{ include "ui-extension.name" . }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          image: "{{ with (coalesce .Values.global.imageRegistry .Values.image.registry) }}{{ . }}/{{ end }}{{ .Values.image.repository }}:{{ .Values.image.tag | default $.Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           securityContext:
             runAsUser: 1000
