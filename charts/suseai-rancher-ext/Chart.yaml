@@ -11,6 +11,7 @@ type: application
 keywords:
   - rancher
   - extension
+  - ai
 home: https://github.com/SUSE/suse-ai-rancher-ext
 icon: https://github.com/SUSE/suse-ai-rancher-ext/blob/main/pkg/suseai-rancher-ext/assets/logo.svg
 sources:
